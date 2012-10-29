@@ -1,0 +1,19 @@
+<configure 
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    i18n_domain="wsapi4plone">
+
+
+    <!-- Application calls (authenticated) -->
+    <browser:pages
+        for="Products.CMFCore.interfaces.IContentish"
+        class=".app.ApplicationAPI"
+        layer="wsapi4plone.core.browser.interfaces.IAPILayer"
+        permission="wsapi.authenticated"
+        >
+        <browser:page
+            name="grant_user_roles"
+            attribute="grant_user_roles"
+            />
+</browser:pages>
+</configure>
