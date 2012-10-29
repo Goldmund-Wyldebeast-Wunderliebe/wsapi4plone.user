@@ -1,0 +1,15 @@
+<configure 
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+    i18n_domain="wsapi4plone">
+
+    <genericsetup:registerProfile
+        name="default"
+        title="Web Services API for Plone - User Extension"
+        description="Extension profile for wsapi4plone.user."
+        provides="Products.GenericSetup.interfaces.EXTENSION"
+        directory="profiles/default"
+        />
+
+
+</configure>

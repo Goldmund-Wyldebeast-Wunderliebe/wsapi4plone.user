@@ -1,0 +1,25 @@
+<configure 
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    i18n_domain="wsapi4plone">
+
+    <!-- Application calls -->
+    <browser:pages
+        for="zope.app.component.interfaces.ISite"
+        class=".app.ApplicationAPI"
+        layer="wsapi4plone.core.browser.interfaces.IAPILayer"
+        permission="wsapi.authenticated"
+        >
+            <browser:page
+                name="get_user"
+                attribute="get_user"
+                />
+
+            <browser:page
+                name="post_user"
+                attribute="post_user"
+                />
+
+    </browser:pages>
+
+</configure>

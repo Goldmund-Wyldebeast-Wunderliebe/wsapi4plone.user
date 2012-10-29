@@ -35,6 +35,8 @@ setup(name='wsapi4plone.user',
       zip_safe=False,
       install_requires=[
           'setuptools',
+          'wsapi4plone.core',
+          'plone.api',
           # -*- Extra requirements: -*-
       ],
       entry_points="""
