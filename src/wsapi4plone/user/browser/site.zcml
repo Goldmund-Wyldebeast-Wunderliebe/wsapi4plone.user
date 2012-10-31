@@ -19,6 +19,10 @@
                 name="post_user"
                 attribute="post_user"
                 />
+            <browser:page                                                          
+                    name="grant_user_roles"                                            
+                    attribute="grant_user_roles"                                       
+                    /> 
 
     </browser:pages>
 

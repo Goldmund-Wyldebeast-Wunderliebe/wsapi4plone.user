@@ -73,6 +73,7 @@ class ApplicationAPI(WSAPI):
                 obj=self.context
                 )
 
+        self.logger.info("- grant_user_roles - For user %s, context: %s, roles: %s " % (username, self.context.id, roles))
         return api.user.get_permissions(username=username,obj=self.context)
 
 
