@@ -4,5 +4,5 @@ i18n_domain="wsapi4plone">
 
     <include package=".browser" />
     <include file="profiles.zcml" />
-
+    <adapter factory=".dexterity.DexterityObjectService" />   
 </configure>
