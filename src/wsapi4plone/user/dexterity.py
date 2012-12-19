@@ -16,7 +16,10 @@ from Products.Archetypes.event import ObjectInitializedEvent
 from wsapi4plone.core.interfaces import IFormatQueryResults
 from wsapi4plone.core.services import PloneService, PloneServiceContainer
 from plone.dexterity.interfaces import IDexterityContent
-
+from zope.schema import getFieldsInOrder
+from plone.behavior.interfaces import IBehaviorAssignable
+from plone.dexterity.interfaces import IDexterityFTI
+from zope.component import getUtility
 
 class DexterityObjectService(PloneService):
     adapts(IDexterityContent)
@@ -30,4 +33,45 @@ class DexterityObjectService(PloneService):
             # elif isinstance(self.context[attr], BaseUnit):
             #     self.context[par].update(params[par], self.context[par])
             #     del params[par]
-        self.context.update(**params)
+
+        context = self.context
+        changed = []
+
+        behavior_fields = []
+        content_fields = []
+
+        # Stap 1 metadata
+        behavior_assignable = IBehaviorAssignable(context)
+        if behavior_assignable:
+            behaviors = behavior_assignable.enumerateBehaviors()
+            for behavior in behaviors:
+                behavior_fields += getFieldsInOrder(behavior.interface)
+
+        # Stap 2 eigen velden
+        fti = context.getTypeInfo()
+        schema = fti.lookupSchema()
+        content_fields = getFieldsInOrder(schema)
+
+
+        fields = behavior_fields
+        fields += content_fields
+
+        for k,v in params.items():
+            found = False
+
+            for field_info in fields:
+                field_name = field_info[0]
+                field = field_info[1]
+
+                if field_name == k:
+                    found = True
+                    field.set(context, v)
+                    changed.append(k)
+                    context.plone_log(u'Setting field "{0}"'.format(k))
+
+            if not found:
+                context.plone_log(u'Cannot find field "{0}"'.format(k))
+
+
+        if changed:
+            context.reindexObject(idxs=changed)
