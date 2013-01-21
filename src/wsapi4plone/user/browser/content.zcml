@@ -15,5 +15,26 @@
             name="grant_user_roles"
             attribute="grant_user_roles"
             />
-</browser:pages>
+    </browser:pages>
+
+    <!-- Application calls (authenticated) -->
+    <browser:pages
+        for="plone.dexterity.interfaces.IDexterityContent"
+        class=".app.ApplicationAPI"
+        layer="wsapi4plone.core.browser.interfaces.IAPILayer"
+        permission="wsapi.authenticated"
+        >
+        <browser:page
+            name="post_object"
+            attribute="post_object"
+            />
+        <browser:page
+            name="put_object"
+            attribute="put_object"
+            />
+        <browser:page
+            name="delete_object"
+            attribute="delete_object"
+            />
+    </browser:pages>
 </configure>

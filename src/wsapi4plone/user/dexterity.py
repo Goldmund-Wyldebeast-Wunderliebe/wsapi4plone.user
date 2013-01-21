@@ -20,16 +20,23 @@ from zope.schema import getFieldsInOrder
 from plone.behavior.interfaces import IBehaviorAssignable
 from plone.dexterity.interfaces import IDexterityFTI
 from zope.component import getUtility
+from datetime import datetime
+from Products.ATContentTypes.utils import DT2dt
 
 class DexterityObjectService(PloneService):
     adapts(IDexterityContent)
 
     def set_properties(self, params):
         for par in params:
-            if isinstance(params[par], xmlrpclib.DateTime):
-                params[par] = DateTime(params[par].value)
+            if isinstance(params[par], xmlrpclib.DateTime):   
+                params[par] = DT2dt(DateTime(params[par].value)).replace(tzinfo=None)                
             elif isinstance(params[par], xmlrpclib.Binary):
+                # import pdb; pdb.set_trace()
                 params[par] = params[par].data
+            elif par == 'creators':
+                params[par] = tuple(params[par])
+            elif isinstance(params[par], str):
+                params[par] = unicode(params[par])
             # elif isinstance(self.context[attr], BaseUnit):
             #     self.context[par].update(params[par], self.context[par])
             #     del params[par]
@@ -62,15 +69,20 @@ class DexterityObjectService(PloneService):
             for field_info in fields:
                 field_name = field_info[0]
                 field = field_info[1]
-
+                field_schema = getattr(field, 'schema', None) 
                 if field_name == k:
-                    found = True
-                    field.set(context, v)
-                    changed.append(k)
-                    context.plone_log(u'Setting field "{0}"'.format(k))
+                    if field_schema and field_schema.getName() in ['INamedBlobImage', 'INamedImage']: 
+                        found = True
+                        setattr(context, field_name, field._type(v)) 
+                        changed.append(k)
+                    else:   
+                        found = True
+                        field.set(context, v)
+                        changed.append(k)
+                    # context.plone_log(u'Setting field "{0}"'.format(k))
 
-            if not found:
-                context.plone_log(u'Cannot find field "{0}"'.format(k))
+            # if not found:
+            #     context.plone_log(u'Cannot find field "{0}"'.format(k))
 
 
         if changed:
