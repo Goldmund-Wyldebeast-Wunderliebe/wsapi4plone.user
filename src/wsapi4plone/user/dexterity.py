@@ -25,6 +25,7 @@ from plone.dexterity.interfaces import IDexterityFTI
 from zope.component import getUtility
 from datetime import datetime
 from Products.ATContentTypes.utils import DT2dt
+from z3c.relationfield.schema import RelationList, RelationChoice
 
 class DexterityObjectService(PloneService):
     adapts(IDexterityContent)
@@ -78,6 +79,16 @@ class DexterityObjectService(PloneService):
                         found = True
                         setattr(context, field_name, field._type(v)) 
                         changed.append(k)
+
+                    elif type(field) == RelationChoice:
+                        context.set_relation(field_name, path=v)
+
+                    elif type(field) == RelationList:
+                        value = v
+                        if type(value) in [str, unicode] :
+                            value = [value,]
+                        context.set_relation(field_name, paths=value)
+                        
                     else:   
                         found = True
                         field.set(context, v)
@@ -86,7 +97,6 @@ class DexterityObjectService(PloneService):
 
             # if not found:
             #     context.plone_log(u'Cannot find field "{0}"'.format(k))
-
 
         if changed:
             context.reindexObject(idxs=changed)
