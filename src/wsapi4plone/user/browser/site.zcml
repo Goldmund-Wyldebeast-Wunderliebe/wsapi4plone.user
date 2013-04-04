@@ -5,7 +5,7 @@
 
     <!-- Application calls -->
     <browser:pages
-        for="zope.app.component.interfaces.ISite"
+        for="zope.component.interfaces.ISite"
         class=".app.ApplicationAPI"
         layer="wsapi4plone.core.browser.interfaces.IAPILayer"
         permission="wsapi.authenticated"

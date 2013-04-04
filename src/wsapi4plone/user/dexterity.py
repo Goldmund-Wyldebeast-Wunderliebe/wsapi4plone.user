@@ -14,7 +14,10 @@ from Products.Archetypes.event import ObjectInitializedEvent
 
 # from interfaces import IService, IServiceContainer
 from wsapi4plone.core.interfaces import IFormatQueryResults
-from wsapi4plone.core.services import PloneService, PloneServiceContainer
+try:
+    from wsapi4plone.core.services import PloneService, PloneServiceContainer
+except ImportError:
+    from wsapi4plone.core.application.services import PloneService, PloneServiceContainer
 from plone.dexterity.interfaces import IDexterityContent
 from zope.schema import getFieldsInOrder
 from plone.behavior.interfaces import IBehaviorAssignable
