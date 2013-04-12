@@ -26,14 +26,16 @@ from zope.component import getUtility
 from datetime import datetime
 from Products.ATContentTypes.utils import DT2dt
 from z3c.relationfield.schema import RelationList, RelationChoice
+import logging
+logger = logging.getLogger("WSA API USER")
 
 class DexterityObjectService(PloneService):
     adapts(IDexterityContent)
 
     def set_properties(self, params):
         for par in params:
-            if isinstance(params[par], xmlrpclib.DateTime):   
-                params[par] = DT2dt(DateTime(params[par].value)).replace(tzinfo=None)                
+            if isinstance(params[par], xmlrpclib.DateTime):
+                params[par] = DT2dt(DateTime(params[par].value)).replace(tzinfo=None)
             elif isinstance(params[par], xmlrpclib.Binary):
                 # import pdb; pdb.set_trace()
                 params[par] = params[par].data
@@ -63,40 +65,45 @@ class DexterityObjectService(PloneService):
         schema = fti.lookupSchema()
         content_fields = getFieldsInOrder(schema)
 
-
         fields = behavior_fields
         fields += content_fields
 
-        for k,v in params.items():
+        for k, v in params.items():
             found = False
 
             for field_info in fields:
-                field_name = field_info[0]
-                field = field_info[1]
-                field_schema = getattr(field, 'schema', None) 
-                if field_name == k:
-                    if field_schema and field_schema.getName() in ['INamedBlobImage', 'INamedImage']: 
-                        found = True
-                        setattr(context, field_name, field._type(v)) 
-                        changed.append(k)
+                try:
+                    field_name = field_info[0]
+                    field = field_info[1]
+                    field_schema = getattr(field, 'schema', None)
+                    if field_name == k:
+                        if field_schema and field_schema.getName() in ['INamedBlobImage', 'INamedImage']:
+                            found = True
+                            setattr(context, field_name, field._type(v))
+                            changed.append(k)
 
-                    elif type(field) == RelationChoice:
-                        context.set_relation(field_name, path=v)
+                        elif type(field) == RelationChoice:
+                                if type(v) in [list, tuple]:
+                                    v = v[0]
+                                context.set_relation(field_name, path=v)
 
-                    elif type(field) == RelationList:
-                        value = v
-                        if type(value) in [str, unicode] :
-                            value = [value,]
-                        context.set_relation(field_name, paths=value)
-                        
-                    else:   
-                        found = True
-                        field.set(context, v)
-                        changed.append(k)
-                    # context.plone_log(u'Setting field "{0}"'.format(k))
+                        elif type(field) == RelationList:
+                            value = v
+                            if type(value) in [str, unicode]:
+                                value = [value, ]
+                            context.set_relation(field_name, paths=value)
 
-            # if not found:
-            #     context.plone_log(u'Cannot find field "{0}"'.format(k))
+                        else:
+                            found = True
+                            field.set(context, v)
+                            changed.append(k)
+                        # context.plone_log(u'Setting field "{0}"'.format(k))
+                except Exception, e:
+                    logger.exception("Error with field '{0}'  : {1}".format(field_name, e))
+                    pass
+
+                # if not found:
+                #     context.plone_log(u'Cannot find field "{0}"'.format(k))
 
         if changed:
             context.reindexObject(idxs=changed)
